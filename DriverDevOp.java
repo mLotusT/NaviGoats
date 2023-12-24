@@ -65,9 +65,9 @@ public class DriverDevOp extends LinearOpMode{
 
     private void loop(){
         handleInput();
-        RightMotor.setPower(-MotorPower); //Needs to be negative because rotates opposite side
-        LeftMotor.setPower(MotorPower);
-        CenterMotor.setPower(MotorCenterPower);
+        RightMotor.setPower(RightMotorPower); //Needs to be negative because rotates opposite side
+        LeftMotor.setPower(LeftMotorPower);
+        //CenterMotor.setPower(MotorCenterPower);
     }
 
     // ENTRY POINT
@@ -85,8 +85,6 @@ public class DriverDevOp extends LinearOpMode{
             
             telemetry.addData("Status", "Running");
             telemetry.update();
-
         }
     }
-
 }
