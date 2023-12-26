@@ -32,7 +32,7 @@ public class AnotherAbrilTagTestDevOp extends LinearOpMode {
 
         abril = AprilTagProcessor.easyCreateWithDefaults();
         // IF RUN TIME ERROR, THATS BECAUSE YOU DIDNT SET UP CONFIG FOR WEBCAM IN DRIVERS HUB
-        vision = VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, "Webcam"), abril);
+        vision = VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, "Webcam 1"), abril);
 
         motorStop();
     }
