@@ -40,7 +40,7 @@ public class DriverDevOp extends LinearOpMode {
         //MotorCenterPower = this.gamepad1.left_stick_x; // change this to the right gampad later
         // Differential Steering (Since we only got 2 motors)
         RightMotorPower = max(min(y + x, -1.0), 1.0);
-        LeftMotorPower = max(min(y - x, -1.0), 1.0);
+        LeftMotorPower = max(min(-y - x, -1.0), 1.0);
 
     }
 

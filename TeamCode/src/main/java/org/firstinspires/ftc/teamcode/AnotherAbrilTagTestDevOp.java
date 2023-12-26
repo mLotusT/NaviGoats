@@ -57,11 +57,11 @@ public class AnotherAbrilTagTestDevOp extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
             List<AprilTagDetection> currentDetections = abril.getDetections();
-            AprilTagDetection detection = currentDetections.get(0);
             telemetry.addData("# AprilTags Detected", currentDetections.size());
 
             if (currentDetections.size() != 0){
                 // For simplicity sake just use the first item
+                AprilTagDetection detection = currentDetections.get(0);
                 if (detection.metadata != null){
                     telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
                     telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)", detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
@@ -72,9 +72,11 @@ public class AnotherAbrilTagTestDevOp extends LinearOpMode {
 
                         if (detection.ftcPose.range > StoppingDistance){
                             motorDrive();
+                            telemetry.addLine("Should be driving");
                         }
                         else{
                             motorStop();;
+                            telemetry.addLine("Should not be driving");
                         }
 
                     }
