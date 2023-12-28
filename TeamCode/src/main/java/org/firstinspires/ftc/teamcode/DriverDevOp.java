@@ -56,7 +56,7 @@ public class DriverDevOp extends LinearOpMode {
     private void drive() {
         handleInput();
         RightMotor.setPower(RightMotorPower); //Needs to be negative because rotates opposite side
-        LeftMotor.setPower(LeftMotorPower);
+        LeftMotor.setPower(-LeftMotorPower);
         //CenterMotor.setPower(MotorCenterPower);
     }
 
