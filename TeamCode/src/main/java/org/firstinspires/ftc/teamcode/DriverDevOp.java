@@ -11,11 +11,9 @@ public class DriverDevOp extends LinearOpMode {
     // Declare Motor Variables
     private DcMotor RightMotor;
     private DcMotor LeftMotor;
-    private DcMotor CenterMotor;
 
     private double RightMotorPower;
     private double LeftMotorPower;
-    private double MotorCenterPower;
 
     // Utility functions
     private double min(double a, double b) { // return b if a < b. Otherwise return a.
@@ -48,16 +46,13 @@ public class DriverDevOp extends LinearOpMode {
         // Assign Motors to corresponding names in drivers hub
         RightMotor = hardwareMap.get(DcMotor.class, "Right");
         LeftMotor = hardwareMap.get(DcMotor.class, "Left");
-        CenterMotor = hardwareMap.get(DcMotor.class, "Center");
 
-        MotorCenterPower = 0.0;
     }
 
     private void drive() {
         handleInput();
         RightMotor.setPower(RightMotorPower); //Needs to be negative because rotates opposite side
         LeftMotor.setPower(-LeftMotorPower);
-        //CenterMotor.setPower(MotorCenterPower);
     }
 
     // ENTRY POINT
