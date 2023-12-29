@@ -13,8 +13,8 @@ import java.util.List;
 
 @TeleOp
 public class AnotherAbrilTagTestDevOp extends LinearOpMode {
-    private double BearingParameter = 10.0; // Will drive forwards +/- of this var
-    private double StoppingDistance = 5.0;
+    private double BearingParameter = 7.0; // Will drive forwards +/- of this var
+    private double StoppingDistance = 7.0;
 
     private double MotorDirection = 1.0; // No idea which way the robot is going. so if its going away from abriltag then just change this to -1.0
 
@@ -38,8 +38,8 @@ public class AnotherAbrilTagTestDevOp extends LinearOpMode {
     }
 
     private void motorDrive(){
-        RightMotor.setPower(1.0 * MotorDirection);
-        LeftMotor.setPower(-1.0 * MotorDirection);
+        RightMotor.setPower(-1.0 * MotorDirection);
+        LeftMotor.setPower(1.0 * MotorDirection);
     }
 
     private void motorStop(){
@@ -89,7 +89,7 @@ public class AnotherAbrilTagTestDevOp extends LinearOpMode {
             else{
                 motorStop();
             }
-
+            telemetry.update();
         }
     }
 }
