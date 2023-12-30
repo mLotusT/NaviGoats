@@ -12,6 +12,9 @@ public class TestDriveOp extends LinearOpMode {
     private DcMotor RightMotor;
     private DcMotor LeftMotor;
 
+    private DcMotor ArmMotor1;
+    private DcMotor ArmMotor2;
+
     private Servo ClawServo;
     private boolean IsClawOpen = false;
 
@@ -51,6 +54,8 @@ public class TestDriveOp extends LinearOpMode {
         RightMotor = hardwareMap.get(DcMotor.class, "Right");
         LeftMotor = hardwareMap.get(DcMotor.class, "Left");
         ClawServo = hardwareMap.get(Servo.class, "Claw");
+        ArmMotor1 = hardwareMap.get(DcMotor.class, "Arm1");
+        ArmMotor2 = hardwareMap.get(DcMotor.class, "Arm2");
     }
 
     private void drive() {
@@ -62,12 +67,24 @@ public class TestDriveOp extends LinearOpMode {
     private void claw(){
         if(gamepad1.x && IsClawOpen) {
             // move to 0 degrees.
-            servoTest.setPosition(0);
+            ClawServo.setPosition(0);
             IsClawOpen = false;
         } else if (gamepad1.x) {
             // move to 90 degrees.
-            servoTest.setPosition(0.5);
+            ClawServo.setPosition(0.5);
             IsClawOpen = true;
+        }
+    }
+
+    private void arm(){
+        if (gamepad1.y){
+            ArmMotor2.setPower(0.25);
+        }
+        else if (gamepad1.a){
+            ArmMotor2.setPower(-0.25);
+        }
+        else{
+            ArmMotor2.setPower(0);
         }
     }
 
@@ -84,6 +101,7 @@ public class TestDriveOp extends LinearOpMode {
         while (opModeIsActive()) {
             drive();
             claw();
+            arm();
             telemetry.addData("Status", "Running");
             telemetry.update();
         }
