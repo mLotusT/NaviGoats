@@ -37,18 +37,6 @@ public class TestDriveOp extends LinearOpMode {
         return a;
     }
 
-    private void handleInput() {
-        double y = this.gamepad1.left_stick_y;
-        double x = this.gamepad1.left_stick_x;
-
-
-        //MotorCenterPower = this.gamepad1.left_stick_x; // change this to the right gampad later
-        // Differential Steering (Since we only got 2 motors)
-        RightMotorPower = max(min(x + y, -1.0), 1.0);
-        LeftMotorPower = max(min(x - y, -1.0), 1.0);
-
-    }
-
     private void setUp() {
         // Assign Motors to corresponding names in drivers hub
         RightMotor = hardwareMap.get(DcMotor.class, "Right");
@@ -59,32 +47,49 @@ public class TestDriveOp extends LinearOpMode {
     }
 
     private void drive() {
-        handleInput();
-        RightMotor.setPower(RightMotorPower); //Needs to be negative because rotates opposite side
+
+        double y = this.gamepad1.left_stick_y;
+        double x = this.gamepad1.left_stick_x;
+
+
+        //MotorCenterPower = this.gamepad1.left_stick_x; // change this to the right gampad later
+        // Differential Steering (Since we only got 2 motors)
+        RightMotorPower = max(min(x + y, -1.0), 1.0);
+        LeftMotorPower = max(min(x - y, -1.0), 1.0);
+
+        RightMotor.setPower(RightMotorPower);
         LeftMotor.setPower(LeftMotorPower);
     }
 
     private void claw(){
-        if(gamepad1.x && IsClawOpen) {
+        ClawServo.setPosition(gamepad1.right_trigger*0.35+0.5);
+/*
+
+       if(gamepad1.right_bumper && IsClawOpen) {
             // move to 0 degrees.
             ClawServo.setPosition(0);
             IsClawOpen = false;
-        } else if (gamepad1.x) {
+        } else if (gamepad1.right_bumper) {
             // move to 90 degrees.
             ClawServo.setPosition(0.5);
             IsClawOpen = true;
         }
+
+ */
+
+
     }
 
     private void arm(){
-        if (gamepad1.y){
-            ArmMotor2.setPower(0.25);
-        }
-        else if (gamepad1.a){
+
+        ArmMotor1.setPower(gamepad1.right_stick_y*0.4);
+
+
+        if (gamepad1.left_bumper){
             ArmMotor2.setPower(-0.25);
         }
         else{
-            ArmMotor2.setPower(0);
+            ArmMotor2.setPower(gamepad1.left_trigger*0.5);
         }
     }
 

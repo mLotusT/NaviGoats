@@ -14,13 +14,13 @@ public class ServoTestDevOp extends LinearOpMode {
     private void handleInput() {
         if(gamepad1.y) {
             // move to 0 degrees.
-            servoTest.setPosition(0);
+            servoTest.setPosition(0.5);
         } else if (gamepad1.x || gamepad1.b) {
             // move to 90 degrees.
-            servoTest.setPosition(0.5);
+            servoTest.setPosition(0.75);
         } else if (gamepad1.a) {
             // move to 180 degrees.
-            servoTest.setPosition(1);
+            servoTest.setPosition(0.85);
         }
     }
 
