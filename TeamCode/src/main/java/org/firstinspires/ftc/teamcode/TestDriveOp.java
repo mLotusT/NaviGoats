@@ -62,19 +62,27 @@ public class TestDriveOp extends LinearOpMode {
     }
 
     private void claw(){
-        if (gamepad1.right_bumper){
-            ClawServo.setPosition(0.2);
-        }
-        else{
-            ClawServo.setPosition(gamepad1.right_trigger*0.35+0.5);
+        ClawServo.setPosition(gamepad1.right_trigger*0.35+0.5);
+/*
 
+       if(gamepad1.right_bumper && IsClawOpen) {
+            // move to 0 degrees.
+            ClawServo.setPosition(0);
+            IsClawOpen = false;
+        } else if (gamepad1.right_bumper) {
+            // move to 90 degrees.
+            ClawServo.setPosition(0.5);
+            IsClawOpen = true;
         }
+
+ */
+
 
     }
 
     private void arm(){
 
-        ArmMotor1.setPower(gamepad1.right_stick_y*0.7);
+        ArmMotor1.setPower(gamepad1.right_stick_y*0.4);
 
 
         if (gamepad1.left_bumper){
