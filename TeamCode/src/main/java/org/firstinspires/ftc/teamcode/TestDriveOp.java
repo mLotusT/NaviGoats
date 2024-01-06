@@ -72,7 +72,7 @@ public class TestDriveOp extends LinearOpMode {
 
     private void arm(){
 
-        ArmMotor1.setPower(gamepad1.right_stick_y*0.4);
+        ArmMotor1.setPower(gamepad1.right_stick_y*0.7);
 
 
         if (gamepad1.left_bumper){

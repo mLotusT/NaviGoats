@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Sensors;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 
 @TeleOp
 public class TestAutoDevOp extends LinearOpMode {
@@ -15,6 +17,14 @@ public class TestAutoDevOp extends LinearOpMode {
     private Servo ClawServo;
     private double RightMotorPower;
     private double LeftMotorPower;
+
+
+    private enum alliance {RED_ALLIANCE, BLUE_ALLIANCE};
+    private alliance CurrentAlliance;
+
+    private boolean isGoingLeft = false; // True left, false right
+
+
 
     private enum ArmStatus {NEUTRAL, DROP, RETRACT};
     private ArmStatus CurrentArmStatus = ArmStatus.RETRACT;
@@ -66,63 +76,46 @@ public class TestAutoDevOp extends LinearOpMode {
     }
 
     private void clawClose(){
-        ClawServo.setPosition(0.85);
+        ClawServo.setPosition(0.95);
     }
 
 
-    /*
-        private void arm(){
-
-        ArmMotor1.setPower(gamepad1.right_stick_y*0.4);
 
 
-        if (gamepad1.left_bumper){
-            ArmMotor2.setPower(-0.25);
-        }
-        else{
-            ArmMotor2.setPower(gamepad1.left_trigger*0.5);
-        }
+    private void turn90degrees(boolean isLeft){
+
     }
 
+    private void turn45degrees(){
 
-     */
-
-    // Make assumptions that arm is starting from retracted state.
-    private void armRetract(){
-        switch (CurrentArmStatus){
-            case DROP:
-                break;
-            case NEUTRAL:
-                break;
-            default:
-                break;
-        }
-        CurrentArmStatus = ArmStatus.RETRACT;
     }
 
-    private void armNeutral(){
-        switch (CurrentArmStatus){
-            case DROP:
-                break;
-            case RETRACT:
-                break;
-            default:
-                break;
-        }
-        CurrentArmStatus = ArmStatus.NEUTRAL;
+    private void autoDrive(double x){
+        RightMotor.setPower(1.0);
+        LeftMotor.setPower(-1.0);
+        sleep((long)(x*570));
+        motorStop();
     }
 
-    private void armDrop(){
-        switch (CurrentArmStatus){
-            case NEUTRAL:
-                break;
-            case RETRACT:
-                break;
-            default:
-                break;
+    private void checkColor(){
+
+        if (BLUE){
+            isGoingLeft = true;
         }
-        CurrentArmStatus = ArmStatus.DROP;
+        else
+        if (RED)
+        {
+            isGoingLeft = false;
+        }
+
+
     }
+
+    private void motorStop(){
+        RightMotor.setPower(0);
+        LeftMotor.setPower(0);
+    }
+
     // ENTRY POINT
     @Override
     public void runOpMode() {
@@ -134,11 +127,12 @@ public class TestAutoDevOp extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         while (opModeIsActive()) {
-            drive();
 
-            if (gamepad1.y){
+            autoDrive(2);
 
-            }
+            checkColor();
+            turn90degrees(isGoingLeft);
+
 
 
             telemetry.addData("Status", "Running");
