@@ -62,17 +62,10 @@ public class TestDriveOp extends LinearOpMode {
     }
 
     private void claw(){
-        if (gamepad1.right_bumper) {
-            ClawServo.setPosition(0.2);
-        }
-        else{
-            ClawServo.setPosition(gamepad1.right_trigger*0.35+0.5);
-        }
+        ClawServo.setPosition(max(min(1-gamepad1.right_stick_y, 0), 1.0));
     }
 
     private void arm(){
-
-        ArmMotor1.setPower(gamepad1.right_stick_y*0.7);
 
 
         if (gamepad1.left_bumper){
@@ -80,6 +73,14 @@ public class TestDriveOp extends LinearOpMode {
         }
         else{
             ArmMotor2.setPower((-0.5)*gamepad1.left_trigger);
+
+        }
+
+        if (gamepad1.right_bumper){
+            ArmMotor1.setPower(-0.65);
+        }
+        else{
+            ArmMotor1.setPower((0.65)*gamepad1.right_trigger);
 
         }
     }
