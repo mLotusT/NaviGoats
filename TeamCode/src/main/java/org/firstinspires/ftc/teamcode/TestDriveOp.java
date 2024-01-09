@@ -37,6 +37,13 @@ public class TestDriveOp extends LinearOpMode {
         return a;
     }
 
+    private double abs(double a){
+        if (a < 0){ // if negative
+            return a * -1;
+        }
+        return a;
+    }
+
     private void setUp() {
         // Assign Motors to corresponding names in drivers hub
         RightMotor = hardwareMap.get(DcMotor.class, "Right");
@@ -62,25 +69,30 @@ public class TestDriveOp extends LinearOpMode {
     }
 
     private void claw(){
-        ClawServo.setPosition(max(min(1-gamepad1.right_stick_y, 0), 1.0));
+        double y = gamepad1.right_stick_y;
+
+        ClawServo.setPosition(1-abs(y));
     }
 
     private void arm(){
-
+        double sensitivityMultiplier = 1.0;
+        if (gamepad1.a){ // hold a
+            sensitivityMultiplier = 0.75;
+        }
 
         if (gamepad1.left_bumper){
-            ArmMotor2.setPower(0.5);
+            ArmMotor2.setPower(0.5 * sensitivityMultiplier);
         }
         else{
-            ArmMotor2.setPower((-0.5)*gamepad1.left_trigger);
+            ArmMotor2.setPower((-0.5 * sensitivityMultiplier)*gamepad1.left_trigger);
 
         }
 
         if (gamepad1.right_bumper){
-            ArmMotor1.setPower(-0.65);
+            ArmMotor1.setPower(-0.65 * sensitivityMultiplier);
         }
         else{
-            ArmMotor1.setPower((0.65)*gamepad1.right_trigger);
+            ArmMotor1.setPower((0.65*sensitivityMultiplier)*gamepad1.right_trigger);
 
         }
     }

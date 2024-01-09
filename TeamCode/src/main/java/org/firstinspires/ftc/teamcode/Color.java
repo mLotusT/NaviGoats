@@ -20,9 +20,16 @@ public class Color extends LinearOpMode {
 
         // While the Op Mode is running, update the telemetry values.
         while (opModeIsActive()) {
-            telemetry.addData("Red", color.red());
-            telemetry.addData("Green", color.green());
-            telemetry.addData("Blue", color.blue());
+            double r = color.red();
+            double g = color.green();
+            double b = color.blue();
+            double Brightness = (0.2126*r + 0.7152*g + 0.0722*b);
+
+
+            telemetry.addData("Red", r);
+            telemetry.addData("Green", g);
+            telemetry.addData("Blue", b);
+            telemetry.addData("Brightness", Brightness);
             telemetry.update();
         }
     }
