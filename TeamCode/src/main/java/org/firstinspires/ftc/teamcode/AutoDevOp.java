@@ -1,3 +1,6 @@
+// AutoDevOp includes all the code for automatic movement without human input.
+// It determines movement based on color sensors and precision movement.
+
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -22,7 +25,6 @@ public class AutoDevOp extends LinearOpMode {
 
     // Setup Color sensor
     ColorSensor ColorSens;
-
 
     private enum DIRECTION {STRAIGHT, LEFT, RIGHT};
 
@@ -49,7 +51,6 @@ public class AutoDevOp extends LinearOpMode {
     }
 
     private void turn(double throttle, DIRECTION turningDirection){
-
         switch (turningDirection){
             case LEFT:
                 LeftMotor.setPower(-throttle);
@@ -60,16 +61,10 @@ public class AutoDevOp extends LinearOpMode {
                 RightMotor.setPower(throttle);
                 break;
         }
-        // 1.436 seconds for 360 degree
     }
 
-
-
-
-
-
-    private void turnUsingGyroscope(double startingYaw, double angleDegrees, DIRECTION turningDirection, double errorThreshold){
-        //Gyro.resetYaw();
+    // Ensures robot turns correctly using a gyroscope
+    private void gyroTurn(double startingYaw, double angleDegrees, DIRECTION turningDirection, double errorThreshold){
         double targetYaw = startingYaw;
 
         switch (turningDirection){
@@ -79,10 +74,7 @@ public class AutoDevOp extends LinearOpMode {
             case RIGHT:
                 targetYaw = startingYaw - angleDegrees;
                 break;
-
         }
-
-
         while (opModeIsActive()){
             double currentYaw = Gyro.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             if (currentYaw > targetYaw + errorThreshold || currentYaw < targetYaw - errorThreshold){
@@ -94,23 +86,13 @@ public class AutoDevOp extends LinearOpMode {
                 }
             }
             else{
-                telemetry.addData("startingYaw", startingYaw);
-                telemetry.addData("currentyaw", currentYaw);
-                telemetry.addData("TargetYaw", targetYaw);
-                telemetry.update();
                 break;
             }
         }
         motorStop();
-
     }
 
-    private void pixelDrop(){
-        // unwrap arm in preperation to drop pixel
-        // TO DO
-        clawOpen();
-    }
-
+    // Robot automatically moves forward
     private void autoDrive(double squares){
         RightMotor.setPower(-0.5);
         LeftMotor.setPower(0.5);
@@ -118,23 +100,8 @@ public class AutoDevOp extends LinearOpMode {
         motorStop();
     }
 
-    private COLOR autoDriveUntilColor(){
-        RightMotor.setPower(-0.5);
-        LeftMotor.setPower(0.5);
-        COLOR c = COLOR.OTHER;
-        while (opModeIsActive()){
-            telemetry.addData("CrurrentYaw", Gyro.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
-            telemetry.update();
-            c = getColor();
-            if (c != COLOR.GREY){
-                break;
-            }
-        }
-        motorStop();
-        return c;
-    }
-
-    private COLOR autoDriveUntilColorUsingGyroscope(double errorThreshold){
+    // Keeps the robot moving in a straight line until it sees a recognizedd color
+    private COLOR gyroMoveUntilColor(double errorThreshold){
         double startingYaw = Gyro.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
         COLOR c = COLOR.OTHER;
@@ -153,8 +120,6 @@ public class AutoDevOp extends LinearOpMode {
                 LeftMotor.setPower(0.5);
             }
 
-            telemetry.addData("CrurrentYaw", Gyro.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
-            telemetry.update();
             c = getColor();
             if (c != COLOR.GREY){
                 break;
@@ -164,6 +129,7 @@ public class AutoDevOp extends LinearOpMode {
         return c;
     }
 
+    // Detects what color the sensor is currently getting
     private COLOR getColor(){
         double ColorThreshold = 128;
         double BrightnessThreshold = 100;
@@ -172,6 +138,7 @@ public class AutoDevOp extends LinearOpMode {
         double g = ColorSens.green();
         double b = ColorSens.blue();
 
+        // Brightness check to keep color detecting the same every time
         double Brightness = (0.2126*r + 0.7152*g + 0.0722*b); // see https://stackoverflow.com/questions/596216/formula-to-determine-perceived-brightness-of-rgb-color
 
         if (Brightness < GreyThreshold){
@@ -188,6 +155,8 @@ public class AutoDevOp extends LinearOpMode {
         return COLOR.OTHER;
     }
 
+    // Converts color detected into a direction
+    // This allows for robot to know correct direction to turn depending on what team they are on
     private DIRECTION colorToDirection(COLOR c){
 
         switch (c) {
@@ -203,6 +172,7 @@ public class AutoDevOp extends LinearOpMode {
         }
     }
 
+    // Turns output variables into easier to use strings
     private String colorToString(COLOR c){ // for finetuning purposes
         switch (c) {
             case BLUE:
@@ -216,6 +186,7 @@ public class AutoDevOp extends LinearOpMode {
         }
     }
 
+    //
     private void motorStop(){
         RightMotor.setPower(0);
         LeftMotor.setPower(0);
@@ -223,21 +194,21 @@ public class AutoDevOp extends LinearOpMode {
 
     private void RunAutomationOneTime(){
         // Actual Automation Code
-        double startyaw = Gyro.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-        CurrentAlliance = autoDriveUntilColorUsingGyroscope(2); // Drive until  not grey color
+        double startYaw = Gyro.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        CurrentAlliance = gyroMoveUntilColor(2); // Drive until  not grey color
         sleep(750);
         autoDrive(0.65);
         sleep(750);
-        turnUsingGyroscope(startyaw,90, colorToDirection(CurrentAlliance), 0.25);
+        gyroTurn(startYaw,90, colorToDirection(CurrentAlliance), 0.25);
         sleep(750);
-        autoDriveUntilColorUsingGyroscope(2);
-        //pixelDrop();
+        gyroMoveUntilColor(2);
         // Attempt to park robot
         sleep(750);
         arm();
         autoDrive(0.15);
     }
 
+    // Moves the arm into position
     private void arm(){
         ArmMotor1.setPower(-0.6);
         sleep(550);
@@ -277,19 +248,5 @@ public class AutoDevOp extends LinearOpMode {
         RunAutomationOneTime();
         //turnUsingGyroscope(90, DIRECTION.RIGHT, 5);
 
-
-
-        while (opModeIsActive()) {
-
-
-            // Test Code, simply outputs color it thinks its seeing
-            //telemetry.addData("Color: ", colorToString(getColor()));
-            //telemetry.addData("Yaw", Gyro.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
-            // Test Automation Movement, uncomment when using, spin both ways
-
-
-            //telemetry.addData("Status", "Running");
-            //telemetry.update();
-        }
     }
 }
