@@ -12,8 +12,31 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-@Autonomous
+@Autonomous(name="Auto Operation", group = "Competition")
 public class AutoDevOp extends LinearOpMode {
+
+    // FINETUINING VARIABLES
+    // Drive Variables
+    private final double straightDrivingErrorThreshold = 1.5;
+    private final double turnDrivingErrorThreshold = 0.125;
+
+    private final double turnSpeed = 0.3;
+    private final double straightSpeed = 0.5;
+
+    // Color variables
+    private final float minRedHue = 30.0f;
+    private final float maxRedHue = 315.0f;
+    private final float minBlueHue = 175.0f;
+    private final float maxBlueHue = 280.0f;
+
+    private final float MaxColorValue = 700; // adjust this later if needed
+
+    //private final float ColorThreshold = 0.19f;
+    //float OpposingColorThreshold = 0.19f;
+    private final float SaturationThreshold = 0.40f;
+    private final float BrightnessThreshold = 0.19f;
+    private final float WhiteThreshold = 0.30f;
+
     // Declare Motor Variables
     private DcMotor RightMotor;
     private DcMotor LeftMotor;
@@ -28,8 +51,8 @@ public class AutoDevOp extends LinearOpMode {
 
     private enum DIRECTION {STRAIGHT, LEFT, RIGHT};
 
-    private enum COLOR {BLUE, RED, GREY, OTHER}
-    private COLOR CurrentAlliance = COLOR.OTHER;
+    private enum COLOR {BLUE, RED, GREY, WHITE, OTHER}
+
     private void setUp() {
         // Assign Motors to corresponding names in drivers hub
         RightMotor = hardwareMap.get(DcMotor.class, "Right");
@@ -50,39 +73,42 @@ public class AutoDevOp extends LinearOpMode {
         ClawServo.setPosition(0.95);
     }
 
-    private void turn(double throttle, DIRECTION turningDirection){
+    private void turn(DIRECTION turningDirection){
         switch (turningDirection){
             case LEFT:
-                LeftMotor.setPower(-throttle);
-                RightMotor.setPower(-throttle);
+                LeftMotor.setPower(-turnSpeed);
+                RightMotor.setPower(-turnSpeed);
                 break;
             case RIGHT:
-                LeftMotor.setPower(throttle);
-                RightMotor.setPower(throttle);
+                LeftMotor.setPower(turnSpeed);
+                RightMotor.setPower(turnSpeed);
                 break;
         }
     }
 
-    // Ensures robot turns correctly using a gyroscope
-    private void gyroTurn(double startingYaw, double angleDegrees, DIRECTION turningDirection, double errorThreshold){
+    private double calculateTargetYaw(double startingYaw, double angleDegrees, DIRECTION turningDirection){
         double targetYaw = startingYaw;
-
         switch (turningDirection){
             case LEFT:
-                targetYaw = startingYaw + angleDegrees;
+                targetYaw += angleDegrees;
                 break;
             case RIGHT:
-                targetYaw = startingYaw - angleDegrees;
+                targetYaw -= angleDegrees;
                 break;
         }
+        return targetYaw;
+    }
+
+    // Ensures robot turns correctly using a gyroscope
+    private void gyroTurn(double targetYaw, double errorThreshold){
         while (opModeIsActive()){
             double currentYaw = Gyro.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             if (currentYaw > targetYaw + errorThreshold || currentYaw < targetYaw - errorThreshold){
                 if (currentYaw > targetYaw + errorThreshold){
-                    turn(0.5, DIRECTION.RIGHT);
+                    turn(DIRECTION.RIGHT);
                 }
                 else{
-                    turn(0.5, DIRECTION.LEFT);
+                    turn(DIRECTION.LEFT);
                 }
             }
             else{
@@ -101,23 +127,26 @@ public class AutoDevOp extends LinearOpMode {
     }
 
     // Keeps the robot moving in a straight line until it sees a recognizedd color
-    private COLOR gyroMoveUntilColor(double errorThreshold){
-        double startingYaw = Gyro.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+    private COLOR gyroMoveUntilColor(double targetYaw, double errorThreshold){
 
         COLOR c = COLOR.OTHER;
         while (opModeIsActive()){
             double currentYaw = Gyro.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
-            if (currentYaw > startingYaw + errorThreshold || currentYaw < startingYaw - errorThreshold){
-                if (currentYaw > startingYaw + errorThreshold){
-                    turn(0.3, DIRECTION.RIGHT);
+            if (currentYaw > targetYaw + errorThreshold || currentYaw < targetYaw - errorThreshold){
+                if (currentYaw > targetYaw + errorThreshold){
+                    motorStop();
+                    sleep(100);
+                    turn(DIRECTION.RIGHT);
                 }
                 else{
-                    turn(0.3, DIRECTION.LEFT);
+                    motorStop();
+                    sleep(100);
+                    turn(DIRECTION.LEFT);
                 }
             }else{
-                RightMotor.setPower(-0.5);
-                LeftMotor.setPower(0.5);
+                RightMotor.setPower(-straightSpeed);
+                LeftMotor.setPower(straightSpeed);
             }
 
             c = getColor();
@@ -129,42 +158,72 @@ public class AutoDevOp extends LinearOpMode {
         return c;
     }
 
+
+    private COLOR gyroMoveUntilColor(double errorThreshold){
+        return gyroMoveUntilColor(Gyro.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES), errorThreshold);
+    }
+
     // Detects what color the sensor is currently getting
     private COLOR getColor(){
-        double ColorThreshold = 128;
-        double BrightnessThreshold = 100;
-        double GreyThreshold = 50;
-        double r = ColorSens.red();
-        double g = ColorSens.green();
-        double b = ColorSens.blue();
+        float[] hsv = new float[3];
+        int[] rgb = new int[3];
 
-        // Brightness check to keep color detecting the same every time
-        double Brightness = (0.2126*r + 0.7152*g + 0.0722*b); // see https://stackoverflow.com/questions/596216/formula-to-determine-perceived-brightness-of-rgb-color
+        int r = ColorSens.red();
+        int g = ColorSens.green();
+        int b = ColorSens.blue();
 
-        if (Brightness < GreyThreshold){
+        // Convert to percent
+        float RedPercantage = Math.min(r/MaxColorValue, 1.0f);
+        float GreenPercantage = Math.min(g/MaxColorValue, 1.0f);
+        float BluePercantage = Math.min(b/MaxColorValue, 1.0f);
+
+        rgb[0] = (int)(RedPercantage*255);
+        rgb[1] = (int)(GreenPercantage*255);
+        rgb[2] = (int)(BluePercantage*255);
+
+        android.graphics.Color.RGBToHSV(rgb[0], rgb[1], rgb[2], hsv); // convert rgb to hsv
+
+        if (hsv[1] < SaturationThreshold && hsv[2] > WhiteThreshold){
+            return COLOR.WHITE;
+        }
+
+        if (hsv[1] < SaturationThreshold){
             return COLOR.GREY;
         }
 
-        if (r > ColorThreshold && Brightness > BrightnessThreshold){
+        /*
+                // USE RGB
+        if (RedPercantage > ColorThreshold && hsv[2] > BrightnessThreshold){
             return COLOR.RED;
         }
-        if (b > ColorThreshold && Brightness > BrightnessThreshold)
+        if (BluePercantage > ColorThreshold && hsv[2] > BrightnessThreshold)
         {
             return COLOR.BLUE;
         }
+         */
+
+
+        // USE HUE
+        if ((hsv[0] < minRedHue || hsv[0] > maxRedHue) && hsv[2] > BrightnessThreshold){
+            return COLOR.RED;
+        }
+        if ((hsv[0] > minBlueHue && hsv[0] < maxBlueHue) && hsv[2] > BrightnessThreshold)
+        {
+            return COLOR.BLUE;
+        }
+
         return COLOR.OTHER;
     }
 
     // Converts color detected into a direction
     // This allows for robot to know correct direction to turn depending on what team they are on
     private DIRECTION colorToDirection(COLOR c){
-
         switch (c) {
+            case OTHER:
             case BLUE:
                 return DIRECTION.LEFT;
             case RED:
-                return DIRECTION.RIGHT;
-            case OTHER:
+            case WHITE:
                 return DIRECTION.RIGHT;
             default:
                 // THIS SHOULD NOT OCCUR, IF THIS OCCURS YOU GOOFED UP
@@ -181,6 +240,8 @@ public class AutoDevOp extends LinearOpMode {
                 return "RED";
             case GREY:
                 return "GREY";
+            case WHITE:
+                return "WHITE";
             default:
                 return "UNKNOWN COLOR";
         }
@@ -190,22 +251,6 @@ public class AutoDevOp extends LinearOpMode {
     private void motorStop(){
         RightMotor.setPower(0);
         LeftMotor.setPower(0);
-    }
-
-    private void RunAutomationOneTime(){
-        // Actual Automation Code
-        double startYaw = Gyro.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-        CurrentAlliance = gyroMoveUntilColor(2); // Drive until  not grey color
-        sleep(750);
-        autoDrive(0.65);
-        sleep(750);
-        gyroTurn(startYaw,90, colorToDirection(CurrentAlliance), 0.25);
-        sleep(750);
-        gyroMoveUntilColor(2);
-        // Attempt to park robot
-        sleep(750);
-        arm();
-        autoDrive(0.15);
     }
 
     // Moves the arm into position
@@ -231,22 +276,54 @@ public class AutoDevOp extends LinearOpMode {
         ArmMotor1.setPower(0.4);
         sleep(500);
         ArmMotor1.setPower(0);
-
     }
 
+    private void runAutomation(){
+        // Actual Automation Code
+
+        Gyro.resetYaw(); // sets yaw to be relative to its current orientation
+        telemetry.addData( "Status", "Running");
+        double startYaw = Gyro.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        telemetry.addData( "CurrentYaw (should be 0): ", startYaw);
+        telemetry.update();
+        COLOR currentAlliance = gyroMoveUntilColor(startYaw, straightDrivingErrorThreshold); // Drive until  not grey color, maintain current bearing
+        telemetry.addData( "Detected Color: ", colorToString(currentAlliance));
+        double targetYaw = calculateTargetYaw(startYaw, 90, colorToDirection(currentAlliance));
+        telemetry.addData("New bearing (should be +/- 90): ", targetYaw);
+        telemetry.update();
+        sleep(500);
+        autoDrive(0.75);
+        sleep(500);
+        gyroTurn(targetYaw, turnDrivingErrorThreshold);
+        sleep(500);
+        gyroMoveUntilColor(targetYaw,straightDrivingErrorThreshold); // Maintain bearing of calculated of orignal start after 90 degree turn
+        sleep(500);
+        gyroTurn(targetYaw, turnDrivingErrorThreshold);
+        // Attempt to park robot
+        sleep(500);
+        arm(); // drop pixel
+        sleep(500);
+        autoDrive(0.15);
+    }
 
     // ENTRY POINT
     @Override
     public void runOpMode() {
-
         setUp(); // Initialize variables.
 
-        telemetry.addData("Status", "Initialized");
+        telemetry.addData( "Status", "Initialized");
         telemetry.update();
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-        RunAutomationOneTime();
-        //turnUsingGyroscope(90, DIRECTION.RIGHT, 5);
+
+        runAutomation();
+        /*
+        // Color Test Code
+        while (opModeIsActive()){
+            telemetry.addData("Color: ", colorToString(getColor()));
+            telemetry.update();
+        }
+         */
 
     }
 }

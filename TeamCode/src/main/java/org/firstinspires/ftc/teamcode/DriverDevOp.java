@@ -16,45 +16,14 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp
+@TeleOp(name="Driver Operation", group = "Competition")
 public class DriverDevOp extends LinearOpMode {
     // Declare Motor Variables
     private DcMotor RightMotor;
     private DcMotor LeftMotor;
-
     private DcMotor ArmMotor1;
     private DcMotor ArmMotor2;
-
     private Servo ClawServo;
-    private boolean IsClawOpen = false;
-
-    private double RightMotorPower;
-    private double LeftMotorPower;
-
-    // Utility functions
-    // Makes it so values cannot go below a value, a
-    private double min(double a, double b) { // return b if a < b. Otherwise return a.
-        if (a < b) {
-            return b;
-        }
-        return a;
-    }
-
-    // Makes it so values cannot go above a value, a
-    private double max(double a, double b) { // return b if a > b. Otherwise return a.
-        if (a > b) {
-            return b;
-        }
-        return a;
-    }
-
-    // Removes negative sign
-    private double abs(double a){
-        if (a < 0){ // if negative
-            return a * -1;
-        }
-        return a;
-    }
 
     // Assign Motors to corresponding names in driver's hub
     private void setup() {
@@ -71,11 +40,11 @@ public class DriverDevOp extends LinearOpMode {
         double x = this.gamepad1.left_stick_x;
 
         // Differential Steering (Since we only got 2 motors)
-        RightMotorPower = max(min(x + y, -1.0), 1.0);
-        LeftMotorPower = max(min(x - y, -1.0), 1.0);
+        double rightMotorPower = Math.min(Math.max(x + y, -1.0), 1.0);
+        double leftMotorPower = Math.min(Math.max(x - y, -1.0), 1.0);
 
-        RightMotor.setPower(RightMotorPower);
-        LeftMotor.setPower(LeftMotorPower);
+        RightMotor.setPower(rightMotorPower);
+        LeftMotor.setPower(leftMotorPower);
     }
 
     // Maps right joy stick for claw control
@@ -84,7 +53,7 @@ public class DriverDevOp extends LinearOpMode {
     private void claw(){
         double y = gamepad1.right_stick_y;
 
-        ClawServo.setPosition(1-abs(y));
+        ClawServo.setPosition(1-Math.abs(y));
     }
 
     // Maps bumper controls to arm
@@ -94,6 +63,9 @@ public class DriverDevOp extends LinearOpMode {
         // While holding a, arm controls get more precise
         if (gamepad1.a) { // hold a
             sensitivityMultiplier = 0.75;
+        }
+        if (gamepad1.y) { // hold y
+            sensitivityMultiplier = 0.5;
         }
 
         // Maps left bumper into moving small arm up

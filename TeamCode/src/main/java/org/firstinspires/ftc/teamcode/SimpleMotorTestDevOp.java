@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 // FULL POWER TO BOTH MOTORS TO DETERMINE INBALANCE OR NOT
 @TeleOp
-
+@Disabled
 public class SimpleMotorTestDevOp extends LinearOpMode {
     // Declare Motor Variables
     private DcMotor RightMotor;
