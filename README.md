@@ -11,7 +11,7 @@ Left Bumper -> Move small arm up
 Left Trigger -> Move small arm down
 Right Bumper -> Move big arm up
 Right Trigger -> Move big arm down
-A -> Enable precision arm movement while holding
+A & Y -> Enable precision arm movement while holding
 Left Joystick (Directional) -> Moving the robot
 Right Joystick (Up/Down) -> Opens claw
 Right Joystick (No Movement) -> Closes claw
